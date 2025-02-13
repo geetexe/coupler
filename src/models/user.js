@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+const SECRET_KEY = "GEET@123_coupler!";
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -36,20 +40,21 @@ const userSchema = new mongoose.Schema({
         },
         required: true
     },
-    passwordHash: {
-        type: String,
-    },
     age: {
         type: Number,
         min: 18,
     },
     gender: {
         type: String,
-        validate(value){
-            if(!['male', 'female', 'others'].includes(value)){
-                throw new Error('Invalid gender type!');
-            }
-        }
+        enum: {
+            values: ['male', 'female', 'others'],
+            message: `{VALUE} is not valid.`
+        },
+        // validate(value){
+        //     if(!['male', 'female', 'others'].includes(value)){
+        //         throw new Error('Invalid gender type!');
+        //     }
+        // }
     },
     photoUrl: {
         type: String,
@@ -69,6 +74,21 @@ const userSchema = new mongoose.Schema({
         type: [String]
     }
 }, { timestamps: true });
+
+userSchema.methods.getJWT = async function() {
+    const user = this;
+    const payload = {
+        id: user._id
+    };
+    const token = await jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
+    return token;
+}
+
+userSchema.methods.validatePassword = async function(password) {
+    const user = this;
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    return isPasswordValid;
+}
 
 const User = mongoose.model('User', userSchema);
 
