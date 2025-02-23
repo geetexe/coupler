@@ -4,10 +4,13 @@ const { userAuth } = require('./../middlewares/auth');
 const ConnectionRequestModel = require('../models/connectionRequest');
 const User = require('../models/user');
 
+const sendEmail = require('./../utils/sendEmail');
+
 requestsRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res) => {
     try{
         const { toUserId, status } = req.params;
         const { _id:fromUserId } = req.user?._id;
+        const initiator = req.user.firstName;
         if(fromUserId === toUserId){
             throw new Error('You cannot send a connection request to yourself.');
         }
@@ -39,7 +42,8 @@ requestsRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res
             fromUserId, toUserId, status
         });
         const data = await connectionRequest.save();
-        const message = status === 'interested' ? `Connection request to ${toUser.firstName} was sent successfully!` : `Connection request to ${toUser.firstName} has been ignored.`
+        const message = status === 'interested' ? `Connection request to ${toUser.firstName} was sent successfully!` : `Connection request to ${toUser.firstName} has been ignored.`;
+        await sendEmail.run(message, initiator);
         res.status(200).json({ message, data });
     }
     catch(error){
