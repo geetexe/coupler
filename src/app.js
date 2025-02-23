@@ -28,10 +28,8 @@ app.use('/', userRouter);
 
 // ROUTES - END ============================================
 
-const PORT = 7777;
-
 const spinServer = () => {
-    app.listen(PORT, () => console.log(`Server is listening on PORT: ${PORT}`));
+    app.listen(process.env.APPLICATION_PORT, () => console.log(`Server is listening on PORT: ${process.env.APPLICATION_PORT}`));
 }
 
 connectDB().then(() => {

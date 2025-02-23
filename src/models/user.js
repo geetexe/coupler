@@ -3,8 +3,6 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const SECRET_KEY = "GEET@123_coupler!";
-
 const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
@@ -80,7 +78,7 @@ userSchema.methods.getJWT = async function() {
     const payload = {
         id: user._id
     };
-    const token = await jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
+    const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: '7d' });
     return token;
 }
 
