@@ -72,7 +72,9 @@ console.log('1', req.body.event);
             message: 'Webhook execution is successful!'
         });
     }
-    catch(err){}
+    catch(err){
+        console.log(err);
+    }
 });
 
 module.exports = paymentRouter;
