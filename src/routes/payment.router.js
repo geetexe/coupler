@@ -44,13 +44,13 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
             webhookSignature, 
             process.env.RAZORPAY_WEBHOOK_SECRET
         );
-        console.log(0)
+        console.log('0', isWebhookValid);
         if(!isWebhookValid){
             return res.status(400).json({
                 message: 'Webhook signature is invalid.'
             });
         }
-console.log(1);
+console.log('1', req.body.event);
         const paymentDetails = req.body.payload.payment.entity;
         const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
         payment.status = paymentDetails.status;
