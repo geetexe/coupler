@@ -43,10 +43,12 @@ requestsRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res
         });
         const data = await connectionRequest.save();
         const message = status === 'interested' ? `Connection request to ${toUser.firstName} was sent successfully!` : `Connection request to ${toUser.firstName} has been ignored.`;
+        console.log(message);
         await sendEmail.run(message, initiator);
         res.status(200).json({ message, data });
     }
     catch(error){
+        console.error(error);
         res.status(400).send(`ERROR: ${error.message}`);
     }
 });
