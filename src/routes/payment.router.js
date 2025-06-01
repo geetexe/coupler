@@ -10,7 +10,7 @@ const User = require('../models/user');
 paymentRouter.post('/createOrder', userAuth, async (req, res) => {
     try{
         const { membershipType } = req.body || {};
-        const { firstName, lastName, email } = req.user || {};
+        const { firstName, lastName } = req.user || {};
 
         // Call RazorPay to initialise the payment and get back the order ID
         const order = await razorpayInstance.orders.create({
@@ -36,7 +36,7 @@ paymentRouter.post('/createOrder', userAuth, async (req, res) => {
 
 paymentRouter.post('/payment/webhook', async (req, res) => {
     try{
-        const webhookSignature = req.get('X-Razorpay-Signature') || req.headers['X-Razorpay-Signature'];
+        const webhookSignature = req.get('X-Razorpay-Signature');
         const isWebhookValid = validateWebhookSignature(
             JSON.stringify(req.body), 
             webhookSignature, 
@@ -60,12 +60,21 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         }
         // else if(req.body.event === 'payment.failed'){}
 
-        return res.status(200).json({
-            message: 'Webhook execution is successful!'
-        });
+        return res.status(200).json({ message: 'Webhook execution is successful!' });
     }
     catch(err){
-        console.log(err);
+        res.status(400).json({ message: err.message || 'Something went wrong.' });
+    }
+});
+
+paymentRouter.get('/verifyPayment/:orderId', async (req, res) => {
+    try{
+        const { orderId } = req.params || {};
+        const paymentStatus = await Payment.findOne({ orderId });
+        res.status(200).json({ isPaymentDone: paymentStatus.status === 'captured' });
+    }
+    catch(err){
+        res.status(400).json({ message: err.message || 'Something went wrong.' });
     }
 });
 
